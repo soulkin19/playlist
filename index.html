@@ -31,7 +31,8 @@
             margin-bottom: 20px;
         }
         label { display: block; font-weight: bold; margin-bottom: 10px; color: #fff; }
-        input[type="file"] { display: block; width: 100%; margin-bottom: 10px; color: #ccc; }
+        input[type="file"], input[type="text"] { display: block; width: 100%; margin-bottom: 10px; color: #ccc; }
+        input[type="text"] { padding: 8px; border-radius: 4px; border: 1px solid #444; background: #333; color: #fff; box-sizing: border-box; }
         small { display: block; font-size: 0.8em; color: #888; }
         
         .radio-group { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
@@ -69,14 +70,27 @@
 <div class="container">
     <h2>耐久動画ジェネレーター</h2>
     <p class="desc">
-        動画をウェブ上で再生せず、指定回数/時間ループさせた「耐久動画ファイル」として直接パソコン・スマホに保存する専用ツールです。<br>
-        ※画質を落とさず高速につなぎ合わせます。<br>
-        ※元動画は <b>.mp4形式</b> を推奨します。生成される動画サイズが大きいとブラウザのメモリ不足になるためご注意ください。
+        動画を指定回数/時間ループさせた「耐久動画ファイル」として直接パソコン・スマホに保存する専用ツールです。<br>
+        ※画質を落とさず高速につなぎ合わせます。
     </p>
     
     <div class="form-group">
-        <label>🎥 元の動画ファイル (必須)</label>
-        <input type="file" id="videoFile" accept="video/mp4,video/webm,video/mov">
+        <label>🎥 動画ソースの選択 (必須)</label>
+        <div class="radio-group">
+            <input type="radio" name="source" id="srcLocal" value="local" checked>
+            <label for="srcLocal">ローカルファイル</label>
+            <input type="radio" name="source" id="srcYoutube" value="youtube">
+            <label for="srcYoutube">YouTube URL</label>
+        </div>
+
+        <div id="localInputArea">
+            <input type="file" id="videoFile" accept="video/mp4,video/webm,video/mov">
+        </div>
+        
+        <div id="ytInputArea" style="display: none;">
+            <input type="text" id="ytUrl" placeholder="https://youtu.be/...">
+            <small style="color: #ffaa00;">※YouTubeの直接保存はブラウザのセキュリティ（CORS）により制限されています。</small>
+        </div>
     </div>
 
     <div class="form-group">
@@ -105,20 +119,39 @@
     <div id="status">待機中...</div>
 </div>
 
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.js"></script>
-<script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 
 <script>
+    const srcLocal = document.getElementById('srcLocal');
+    const srcYoutube = document.getElementById('srcYoutube');
+    const localInputArea = document.getElementById('localInputArea');
+    const ytInputArea = document.getElementById('ytInputArea');
+    const ytUrl = document.getElementById('ytUrl');
+
     const radioCount = document.getElementById('radioCount');
     const radioTime = document.getElementById('radioTime');
     const countInput = document.getElementById('countInput');
     const timeH = document.getElementById('timeH');
     const timeM = document.getElementById('timeM');
     const timeS = document.getElementById('timeS');
+    
     const makeBtn = document.getElementById('makeBtn');
     const statusDiv = document.getElementById('status');
     const videoInput = document.getElementById('videoFile');
     const thumbInput = document.getElementById('thumbFile');
+
+    // ソース入力欄の切り替え
+    function updateSourceInputs() {
+        if (srcLocal.checked) {
+            localInputArea.style.display = 'block';
+            ytInputArea.style.display = 'none';
+        } else {
+            localInputArea.style.display = 'none';
+            ytInputArea.style.display = 'block';
+        }
+    }
+    srcLocal.addEventListener('change', updateSourceInputs);
+    srcYoutube.addEventListener('change', updateSourceInputs);
 
     // モード切替時の入力欄制御
     function updateInputs() {
@@ -129,7 +162,7 @@
     radioTime.addEventListener('change', updateInputs);
     updateInputs();
 
-    // 動画の長さを取得する関数
+    // 動画の長さを取得
     function getVideoDuration(file) {
         return new Promise((resolve, reject) => {
             const video = document.createElement('video');
@@ -147,12 +180,24 @@
         });
     }
 
-    // 処理本体
-    const { FFmpeg } = window.FFmpeg;
-    const { fetchFile } = window.FFmpegUtil;
-    let ffmpeg = null;
+    // シングルスレッド用のコアを指定して初期化（これでfile://でも動くようになります）
+    const { createFFmpeg, fetchFile } = FFmpeg;
+    const ffmpeg = createFFmpeg({ 
+        log: true,
+        corePath: 'https://unpkg.com/@ffmpeg/core-st@0.11.1/dist/ffmpeg-core.js'
+    });
 
     makeBtn.addEventListener('click', async () => {
+        // YouTubeが選択された場合の制限アラート
+        if (srcYoutube.checked) {
+            if (!ytUrl.value) {
+                alert("YouTubeのURLを入力してください。");
+                return;
+            }
+            alert("【重要：YouTube動画を耐久化したい場合】\nブラウザの厳重なセキュリティ制限（CORS）により、HTMLからYouTubeの動画データを直接引き抜いて保存することは100%不可能となっています。\n\nお手数ですが、一度外部の動画ダウンロードサイト等で対象のYouTube動画を「MP4ファイル」としてパソコンに保存し、このツールの『ローカルファイル』として読み込ませてください。そうすれば指定時間での耐久動画の作成・サムネイル変更が完璧に行えます！");
+            return;
+        }
+
         if (!videoInput.files.length) {
             alert("元の動画ファイルを選択してください。");
             return;
@@ -164,31 +209,21 @@
         makeBtn.disabled = true;
         
         try {
-            statusDiv.innerText = "変換エンジンを準備中...";
-            if (!ffmpeg) {
-                ffmpeg = new FFmpeg();
-                ffmpeg.on('log', ({ message }) => {
-                    console.log(message);
-                    if (message.includes('time=')) {
-                        statusDiv.innerText = "耐久動画を生成中... " + message;
-                    }
-                });
-                await ffmpeg.load({
-                    coreURL: "https://unpkg.com/@ffmpeg/core@0.12.4/dist/umd/ffmpeg-core.js",
-                    wasmURL: "https://unpkg.com/@ffmpeg/core@0.12.4/dist/umd/ffmpeg-core.wasm",
-                });
+            statusDiv.innerText = "変換エンジンを準備中...（初回は10秒ほどかかります）";
+            if (!ffmpeg.isLoaded()) {
+                await ffmpeg.load();
             }
 
             statusDiv.innerText = "ファイルを読み込み中...";
             const vidExt = videoFile.name.split('.').pop();
             const inVid = 'input.' + vidExt;
-            await ffmpeg.writeFile(inVid, await fetchFile(videoFile));
+            ffmpeg.FS('writeFile', inVid, await fetchFile(videoFile));
             
             let inThumb = null;
             if (thumbFile) {
                 const thExt = thumbFile.name.split('.').pop();
                 inThumb = 'thumb.' + thExt;
-                await ffmpeg.writeFile(inThumb, await fetchFile(thumbFile));
+                ffmpeg.FS('writeFile', inThumb, await fetchFile(thumbFile));
             }
 
             let loops = 1;
@@ -205,7 +240,62 @@
                 targetSec = (h * 3600) + (m * 60) + s;
                 
                 if (targetSec <= 0) throw new Error("時間が正しく設定されていません");
-                loops = Math.ceil(targetSec / duration); // 指定時間に必要なループ回数を計算
+                loops = Math.ceil(targetSec / duration); 
             }
 
             statusDiv.innerText = "構成リストを作成中...";
+            const listContent = Array(loops).fill(`file '${inVid}'`).join("\n");
+            ffmpeg.FS('writeFile', 'list.txt', new TextEncoder().encode(listContent));
+
+            statusDiv.innerText = "耐久動画を高速生成中...（画面を閉じずにお待ちください）";
+            
+            let args = ['-f', 'concat', '-safe', '0', '-i', 'list.txt'];
+            
+            if (inThumb) {
+                args.push('-i', inThumb, '-map', '0', '-map', '1', '-c', 'copy', '-c:v:1', 'mjpeg', '-disposition:v:1', 'attached_pic');
+            } else {
+                args.push('-c', 'copy');
+            }
+
+            if (radioTime.checked && targetSec > 0) {
+                args.push('-t', String(targetSec));
+            }
+            
+            const outVid = 'output.mp4';
+            args.push(outVid);
+
+            // コマンドを実行
+            await ffmpeg.run(...args);
+
+            statusDiv.innerText = "ファイルの保存を準備中...";
+            const data = ffmpeg.FS('readFile', outVid);
+            
+            const blob = new Blob([data.buffer], { type: 'video/mp4' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `endurance_${Date.now()}.mp4`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            statusDiv.innerText = "完了！耐久動画が保存されました。";
+            
+            // メモリ解放
+            ffmpeg.FS('unlink', inVid);
+            if (inThumb) ffmpeg.FS('unlink', inThumb);
+            ffmpeg.FS('unlink', 'list.txt');
+            ffmpeg.FS('unlink', outVid);
+
+        } catch (e) {
+            console.error(e);
+            statusDiv.innerText = "エラーが発生しました: " + e.message;
+        } finally {
+            makeBtn.disabled = false;
+        }
+    });
+</script>
+
+</body>
+</html>

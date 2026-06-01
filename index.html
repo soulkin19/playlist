@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>耐久動画プレイヤー</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e1e;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { margin-top: 0; }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: #3d3d3d;
+            color: #fff;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background: #0078d7;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background: #005a9e; }
+        input[type="file"] { display: none; }
+        .file-label {
+            padding: 10px 15px;
+            border-radius: 5px;
+            background: #28a745;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .file-label:hover { background: #218838; }
+        
+        .player-wrapper {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        video { width: 100%; height: 100%; display: none; }
+        #ytPlayer { display: none; width: 100%; height: 100%; }
+
+        .loop-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: #444;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .playlist {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .playlist li {
+            background: #3d3d3d;
+            margin-bottom: 8px;
+            padding: 12px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .playlist li span {
+            cursor: pointer;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .playlist li span:hover { text-decoration: underline; color: #66b3ff; }
+        .playlist li.active { border-left: 5px solid #0078d7; background: #4d4d4d; }
+        .delete-btn {
+            background: #dc3545;
+            padding: 5px 10px;
+            margin-left: 10px;
+        }
+        .delete-btn:hover { background: #c82333; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>耐久動画プレイヤー</h1>
+        
+        <div class="controls">
+            <input type="text" id="ytInput" placeholder="YouTubeのURLを貼り付け...">
+            <button onclick="addYouTube()">YT追加</button>
+            <label class="file-label">
+                ローカル動画追加
+                <input type="file" id="localInput" accept="video/*" onchange="addLocalVideo(event)">
+            </label>
+        </div>
+
+        <div class="loop-control">
+            <input type="checkbox" id="loopCheck" checked>
+            <label for="loopCheck">🔥 1曲ループ（耐久モード）</label>
+        </div>
+
+        <div class="player-wrapper">
+            <div id="ytPlayer"></div>
+            <video id="localPlayer" controls></video>
+        </div>
+
+        <h3>プレイリスト</h3>
+        <ul class="playlist" id="playlistUI"></ul>
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        let ytPlayer;
+        let playlist = [];
+        let currentIndex = -1;
+        const localPlayer = document.getElementById('localPlayer');
+        const loopCheck = document.getElementById('loopCheck');
+
+        // YouTube API 初期化
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('ytPlayer', {
+                events: {
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        // プレイリストの読み込み（YouTubeリンクのみ保存可能）
+        window.onload = () => {
+            const saved = localStorage.getItem('endurance_playlist');
+            if (saved) {
+                playlist = JSON.parse(saved);
+                renderPlaylist();
+            }
+        };
+
+        // プレイリストを保存
+        function savePlaylist() {
+            // ローカルファイルはブラウザを閉じるとURLが無効になるため除外して保存
+            const storable = playlist.filter(item => item.type === 'yt');
+            localStorage.setItem('endurance_playlist', JSON.stringify(storable));
+        }
+
+        // YouTube追加
+        function addYouTube() {
+            const url = document.getElementById('ytInput').value;
+            if (!url) return;
+            const videoId = extractYTId(url);
+            if (videoId) {
+                playlist.push({ type: 'yt', id: videoId, title: 'YouTube: ' + videoId });
+                savePlaylist();
+                renderPlaylist();
+                document.getElementById('ytInput').value = '';
+            } else {
+                alert('有効なYouTube URLを入力してください。');
+            }
+        }
+
+        // ローカル動画追加
+        function addLocalVideo(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const fileURL = URL.createObjectURL(file);
+                playlist.push({ type: 'local', url: fileURL, title: file.name });
+                renderPlaylist();
+            }
+            event.target.value = '';
+        }
+
+        // YouTube ID抽出
+        function extractYTId(url) {
+            const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+            const match = url.match(regExp);
+            return match ? match[1] : null;
+        }
+
+        // プレイリスト描画
+        function renderPlaylist() {
+            const ui = document.getElementById('playlistUI');
+            ui.innerHTML = '';
+            playlist.forEach((item, index) => {
+                const li = document.createElement('li');
+                if (index === currentIndex) li.classList.add('active');
+                
+                const titleSpan = document.createElement('span');
+                titleSpan.textContent = item.title;
+                titleSpan.onclick = () => playVideo(index);
+                
+                const delBtn = document.createElement('button');
+                delBtn.textContent = '削除';
+                delBtn.className = 'delete-btn';
+                delBtn.onclick = () => deleteItem(index);
+
+                li.appendChild(titleSpan);
+                li.appendChild(delBtn);
+                ui.appendChild(li);
+            });
+        }
+
+        function deleteItem(index) {
+            playlist.splice(index, 1);
+            savePlaylist();
+            if (index === currentIndex) {
+                stopAll();
+                currentIndex = -1;
+            } else if (index < currentIndex) {
+                currentIndex--;
+            }
+            renderPlaylist();
+        }
+
+        function stopAll() {
+            if (ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
+            localPlayer.pause();
+            document.getElementById('ytPlayer').style.display = 'none';
+            localPlayer.style.display = 'none';
+        }
+
+        // 動画再生
+        function playVideo(index) {
+            if (index < 0 || index >= playlist.length) return;
+            currentIndex = index;
+            renderPlaylist();
+            stopAll();
+
+            const item = playlist[index];
+            if (item.type === 'yt') {
+                document.getElementById('ytPlayer').style.display = 'block';
+                ytPlayer.loadVideoById(item.id);
+            } else if (item.type === 'local') {
+                localPlayer.style.display = 'block';
+                localPlayer.src = item.url;
+                localPlayer.loop = loopCheck.checked;
+                localPlayer.play();
+            }
+        }
+
+        // ローカル動画の終了検知（ループオフ時）
+        localPlayer.onended = () => {
+            if (!loopCheck.checked) playNext();
+        };
+
+        // YouTubeの終了検知
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.ENDED) {
+                if (loopCheck.checked) {
+                    ytPlayer.seekTo(0);
+                    ytPlayer.playVideo();
+                } else {
+                    playNext();
+                }
+            }
+        }
+
+        // 次の動画へ
+        function playNext() {
+            if (playlist.length === 0) return;
+            let nextIndex = currentIndex

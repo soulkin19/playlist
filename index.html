@@ -119,7 +119,13 @@
     <div id="status">待機中...</div>
 </div>
 
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js"></script>
+<script>
+    if (typeof SharedArrayBuffer === 'undefined') {
+        window.SharedArrayBuffer = ArrayBuffer;
+    }
+</script>
+
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 
 <script>
     const srcLocal = document.getElementById('srcLocal');
@@ -180,12 +186,15 @@
         });
     }
 
-    // 競合エラーを起こさないように初期化
+    // 完全にシングルスレッドで動かすコアを指定
     const { createFFmpeg, fetchFile } = FFmpeg;
-    const ffmpeg = createFFmpeg({ log: true });
+    const ffmpeg = createFFmpeg({ 
+        log: true,
+        corePath: 'https://unpkg.com/@ffmpeg/core-st@0.11.1/dist/ffmpeg-core.js'
+    });
 
     makeBtn.addEventListener('click', async () => {
-        // YouTubeが選択された場合の制限アラート（要望通りUIは維持）
+        // YouTubeが選択された場合の制限アラート
         if (srcYoutube.checked) {
             if (!ytUrl.value) {
                 alert("YouTubeのURLを入力してください。");

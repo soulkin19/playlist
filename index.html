@@ -3,216 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>7095110電卓（野獣先輩ver）</title>
+    <title>114514電卓 7095110版</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
         body {
-            background-color: #f5f5dc;
-            color: #333;
-            font-family: 'Meiryo', sans-serif;
+            background: linear-gradient(135deg, #0f0f0f, #1a1a2e);
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            padding: 40px 20px;
+            min-height: 100vh;
             margin: 0;
+            font-family: 'Press Start 2P', sans-serif;
         }
-        h1 {
-            color: #810810;
-            margin-bottom: 5px;
-        }
-        p.desc {
-            color: #555;
-            margin-bottom: 20px;
-        }
+        
         .calculator {
-            background-color: #114514;
+            background: #222;
             padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            width: 320px;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(0, 255, 100, 0.6),
+                        inset 0 0 20px rgba(255, 255, 255, 0.1);
+            border: 6px solid #0f0;
         }
-        .display-container {
-            background-color: #c7d0cc; /* 液晶っぽい色 */
-            border: inset 3px #888;
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 20px;
+        
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #0f0;
+            text-shadow: 0 0 10px #0f0;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin: 0;
+            letter-spacing: 4px;
+        }
+        
+        .version {
+            font-size: 12px;
+            color: #0ff;
+            text-shadow: 0 0 8px #0ff;
+        }
+        
+        #display {
+            width: 100%;
+            height: 90px;
+            background: #111;
+            color: #0f0;
+            font-size: 32px;
             text-align: right;
-            word-wrap: break-word;
+            padding: 0 15px;
+            border: 4px solid #0f0;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: inset 0 0 15px rgba(0, 255, 0, 0.5);
+            font-family: 'Press Start 2P', sans-serif;
+            overflow: hidden;
         }
-        #calc-input {
-            font-size: 1.2em;
-            color: #555;
-            min-height: 1.5em;
-        }
-        #calc-result {
-            font-size: 2em;
-            font-weight: bold;
-            color: #000;
-            margin: 5px 0;
-            min-height: 1.2em;
-        }
-        #yaju-formula {
-            font-size: 1em;
-            color: #810810;
-            font-weight: bold;
-            min-height: 1.5em;
-        }
-        .keypad {
+        
+        .buttons {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            gap: 12px;
         }
+        
         button {
-            padding: 15px;
-            font-size: 1.5em;
-            font-weight: bold;
+            height: 70px;
+            font-size: 22px;
+            font-family: 'Press Start 2P', sans-serif;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
-            background-color: #eee;
-            box-shadow: 0 4px #aaa;
-            transition: 0.1s;
+            transition: all 0.1s;
+            box-shadow: 0 5px 0 #000;
         }
+        
         button:active {
-            box-shadow: 0 0 #aaa;
             transform: translateY(4px);
+            box-shadow: 0 1px 0 #000;
         }
-        button.op {
-            background-color: #dcdcdc;
-            color: #114514;
+        
+        .num {
+            background: #333;
+            color: #0ff;
         }
-        button.equal {
-            background-color: #810810;
-            color: white;
-            box-shadow: 0 4px #4a0408;
+        
+        .num:active {
+            background: #555;
+        }
+        
+        .operator {
+            background: #0f0;
+            color: #111;
+            font-weight: bold;
+        }
+        
+        .operator:active {
+            background: #0c0;
+        }
+        
+        .clear {
+            background: #f00;
+            color: #fff;
             grid-column: span 2;
         }
-        button.equal:active {
-            box-shadow: 0 0 #4a0408;
-        }
-        button.clear {
-            background-color: #d32f2f;
-            color: white;
-            box-shadow: 0 4px #8a1f1f;
+        
+        .equal {
+            background: #00f;
+            color: #fff;
             grid-column: span 2;
         }
-        button.clear:active {
-            box-shadow: 0 0 #8a1f1f;
+        
+        .special {
+            background: #ff0;
+            color: #111;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 15px;
+            color: #0f0;
+            font-size: 10px;
+            opacity: 0.7;
         }
     </style>
 </head>
 <body>
-    <h1>7095110電卓</h1>
-    <p class="desc">計算結果を7095110で表す特別仕様だゾ</p>
-
     <div class="calculator">
-        <div class="display-container">
-            <div id="calc-input"></div>
-            <div id="calc-result">0</div>
-            <div id="yaju-formula">準備中...</div>
+        <div class="header">
+            <h1>114514電卓</h1>
+            <div class="version">7095110版</div>
         </div>
-        <div class="keypad">
+        
+        <input type="text" id="display" readonly placeholder="0">
+        
+        <div class="buttons">
             <button class="clear" onclick="clearDisplay()">C</button>
-            <button class="op" onclick="appendChar('/')">÷</button>
-            <button class="op" onclick="appendChar('*')">×</button>
+            <button onclick="appendToDisplay('(')">(</button>
+            <button onclick="appendToDisplay(')')">)</button>
+            <button class="operator" onclick="appendToDisplay('/')">÷</button>
             
-            <button onclick="appendChar('7')">7</button>
-            <button onclick="appendChar('8')">8</button>
-            <button onclick="appendChar('9')">9</button>
-            <button class="op" onclick="appendChar('-')">−</button>
+            <button class="num" onclick="appendToDisplay('7')">7</button>
+            <button class="num" onclick="appendToDisplay('8')">8</button>
+            <button class="num" onclick="appendToDisplay('9')">9</button>
+            <button class="operator" onclick="appendToDisplay('*')">×</button>
             
-            <button onclick="appendChar('4')">4</button>
-            <button onclick="appendChar('5')">5</button>
-            <button onclick="appendChar('6')">6</button>
-            <button class="op" onclick="appendChar('+')">＋</button>
+            <button class="num" onclick="appendToDisplay('4')">4</button>
+            <button class="num" onclick="appendToDisplay('5')">5</button>
+            <button class="num" onclick="appendToDisplay('6')">6</button>
+            <button class="operator" onclick="appendToDisplay('-')">−</button>
             
-            <button onclick="appendChar('1')">1</button>
-            <button onclick="appendChar('2')">2</button>
-            <button onclick="appendChar('3')">3</button>
-            <button class="equal" style="grid-row: span 2; height: 100%;" onclick="calculate()">＝</button>
+            <button class="num" onclick="appendToDisplay('1')">1</button>
+            <button class="num" onclick="appendToDisplay('2')">2</button>
+            <button class="num" onclick="appendToDisplay('3')">3</button>
+            <button class="operator" onclick="appendToDisplay('+')">＋</button>
             
-            <button onclick="appendChar('0')" style="grid-column: span 2;">0</button>
-            <button onclick="appendChar('.')">.</button>
+            <button class="num" onclick="appendToDisplay('0')">0</button>
+            <button class="num" onclick="appendToDisplay('.')">.</button>
+            <button class="special" onclick="special114514()">114514</button>
+            <button class="equal" onclick="calculate()">=</button>
+            
+            <button class="special" onclick="special7095110()" style="grid-column: span 2;">7095110</button>
+            <button class="special" onclick="iiyo()" style="grid-column: span 2;">いいよ</button>
+        </div>
+        
+        <div class="footer">
+            7095110 EDITION
         </div>
     </div>
 
     <script>
-        const digits = ['7', '0', '9', '5', '1', '1', '0'];
-        const operators = ['+', '-', '*', '/', '']; 
-        let expressionMap = new Map();
-        let currentExpression = "";
-
-        // ページ読み込み時に7095110の全パターンを計算（バックグラウンド処理）
-        window.onload = function() {
-            const dfs = (index, currentExpr) => {
-                if (index === digits.length - 1) {
-                    let safeExpr = currentExpr.replace(/\b0+(?=\d)/g, '');
-                    try {
-                        let result = eval(safeExpr);
-                        if (Number.isFinite(result) && Number.isInteger(result)) {
-                            if (!expressionMap.has(result)) {
-                                expressionMap.set(result, currentExpr);
-                            }
-                        }
-                    } catch(e) {}
-                    return;
-                }
-                for (let op of operators) {
-                    dfs(index + 1, currentExpr + op + digits[index + 1]);
-                }
-            };
-            dfs(0, digits[0]);
-            document.getElementById('yaju-formula').innerText = "完了したゾ！";
-        };
-
-        function updateDisplay() {
-            const display = document.getElementById('calc-input');
-            display.innerText = currentExpression.replace(/\*/g, ' × ').replace(/\//g, ' ÷ ').replace(/\+/g, ' ＋ ').replace(/\-/g, ' − ');
+        let display = document.getElementById('display');
+        
+        function appendToDisplay(value) {
+            if (display.value === '0' && value !== '.') {
+                display.value = value;
+            } else {
+                display.value += value;
+            }
         }
-
-        function appendChar(char) {
-            currentExpression += char;
-            updateDisplay();
-        }
-
+        
         function clearDisplay() {
-            currentExpression = "";
-            document.getElementById('calc-input').innerText = "";
-            document.getElementById('calc-result').innerText = "0";
-            document.getElementById('yaju-formula').innerText = "";
+            display.value = '';
         }
-
+        
         function calculate() {
             try {
                 // 安全な計算処理
-                let result = eval(currentExpression);
-                
-                // 小数点第4位で丸める
-                result = Math.round(result * 10000) / 10000;
-                
-                document.getElementById('calc-result').innerText = result;
-
-                // 7095110への変換ロジック
-                const yajuDisplay = document.getElementById('yaju-formula');
-                
-                if (!Number.isInteger(result)) {
-                    yajuDisplay.innerText = "（小数は作れないゾ…）";
-                } else if (expressionMap.has(result)) {
-                    let expr = expressionMap.get(result);
-                    let displayExpr = expr
-                        .replace(/\*/g, ' × ')
-                        .replace(/\//g, ' ÷ ')
-                        .replace(/\+/g, ' ＋ ')
-                        .replace(/\-/g, ' − ');
-                    yajuDisplay.innerText = `＝ ${displayExpr}`;
-                } else {
-                    yajuDisplay.innerText = "ンアッー！(作れないゾ)";
-                }
+                let result = eval(display.value.replace('×', '*').replace('÷', '/'));
+                display.value = result;
             } catch (e) {
-                document.getElementById('calc-result').innerText = "Error";
-                document.getElementById('yaju-formula').innerText = "式がオカシイだろ！";
+                display.value = 'ERROR';
+                setTimeout(() => { display.value = ''; }, 1000);
             }
         }
+        
+        // 114514ボタン
+        function special114514() {
+            display.value = '114514';
+        }
+        
+        // 7095110ボタン
+        function special7095110() {
+            display.value = '7095110';
+        }
+        
+        // いいよボタン（114514のネタ）
+        function iiyo() {
+            display.value = 'いいよいいよ';
+            setTimeout(() => {
+                display.value = '114514';
+            }, 800);
+        }
+        
+        // Enterキーで計算
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                calculate();
+            }
+        });
+        
+        console.log('%c114514電卓 7095110版 起動完了', 'color:#0f0; font-family:monospace;');
     </script>
 </body>
 </html>

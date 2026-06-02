@@ -3,305 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>耐久動画メーカー（保存専用）</title>
+    <title>7095110ジェネレーター（野獣先輩ver）</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
-            margin: 0;
-            padding: 30px;
-            display: flex;
-            justify-content: center;
+            background-color: #f5f5dc; /* 落ち着いた背景色 */
+            color: #333;
+            font-family: 'Meiryo', sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        h1 {
+            color: #810810; /* 810カラー */
         }
         .container {
-            width: 100%;
-            max-width: 600px;
-            background: #1e1e1e;
+            background-color: #fff;
+            border: 3px solid #114514; /* 114514カラー */
+            border-radius: 10px;
             padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
-        h2 { margin-top: 0; color: #ff5252; text-align: center; }
-        .desc { font-size: 0.9em; color: #aaa; margin-bottom: 25px; line-height: 1.5; }
-        .form-group {
-            background: #2a2a2a;
-            padding: 20px;
-            border-radius: 8px;
+        p.desc {
+            font-size: 1.1em;
             margin-bottom: 20px;
         }
-        label { display: block; font-weight: bold; margin-bottom: 10px; color: #fff; }
-        input[type="file"], input[type="text"] { display: block; width: 100%; margin-bottom: 10px; color: #ccc; }
-        input[type="text"] { padding: 8px; border-radius: 4px; border: 1px solid #444; background: #333; color: #fff; box-sizing: border-box; }
-        small { display: block; font-size: 0.8em; color: #888; }
-        
-        .radio-group { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
-        .radio-group input[type="number"] {
-            width: 70px; padding: 5px; border-radius: 4px; border: 1px solid #444; background: #333; color: #fff;
+        input[type="number"] {
+            padding: 12px;
+            font-size: 1.2em;
+            width: 70%;
+            margin-bottom: 20px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
         }
-        .radio-group input[type="number"]:disabled { opacity: 0.5; cursor: not-allowed; }
-
         button {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            background: #ff5252;
+            background-color: #114514;
             color: white;
-            font-size: 1.1em;
+            padding: 12px 30px;
+            font-size: 1.2em;
             font-weight: bold;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: 0.2s;
         }
-        button:hover { background: #ff1744; }
-        button:disabled { background: #555; cursor: not-allowed; }
-        
-        #status {
-            margin-top: 20px;
-            text-align: center;
+        button:hover {
+            background-color: #810810;
+        }
+        #result {
+            margin-top: 30px;
+            font-size: 1.6em;
             font-weight: bold;
-            color: #64ffda;
-            min-height: 24px;
+            color: #d32f2f;
+            word-wrap: break-word;
+            min-height: 2em;
+        }
+        .loading {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: gray;
         }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <h2>耐久動画ジェネレーター</h2>
-    <p class="desc">
-        動画を指定回数/時間ループさせた「耐久動画ファイル」として直接パソコン・スマホに保存する専用ツールです。<br>
-        ※画質を落とさず高速につなぎ合わせます。
-    </p>
-    
-    <div class="form-group">
-        <label>🎥 動画ソースの選択 (必須)</label>
-        <div class="radio-group">
-            <input type="radio" name="source" id="srcLocal" value="local" checked>
-            <label for="srcLocal">ローカルファイル</label>
-            <input type="radio" name="source" id="srcYoutube" value="youtube">
-            <label for="srcYoutube">YouTube URL</label>
-        </div>
-
-        <div id="localInputArea">
-            <input type="file" id="videoFile" accept="video/mp4,video/webm,video/mov">
-        </div>
+    <div class="container">
+        <h1>7095110ジェネレーター</h1>
+        <p class="desc">
+            入力した数字を「7, 0, 9, 5, 1, 1, 0」の順番で作るゾ。<br>
+            見とけよ見とけよ〜
+        </p>
         
-        <div id="ytInputArea" style="display: none;">
-            <input type="text" id="ytUrl" placeholder="https://youtu.be/...">
-            <small style="color: #ffaa00;">※YouTubeの直接保存はブラウザのセキュリティ（CORS）により制限されています。</small>
-        </div>
+        <input type="number" id="targetNumber" placeholder="好きな数字を入れるゾ">
+        <br>
+        <button onclick="generate()">生成するゾ</button>
+        
+        <div id="result">ここに式が出るゾ</div>
+        <p class="loading" id="status">計算パターン準備中...</p>
     </div>
 
-    <div class="form-group">
-        <label>🖼 サムネイル画像 (任意)</label>
-        <input type="file" id="thumbFile" accept="image/jpeg,image/png">
-        <small>設定すると動画ファイルの「カバー画像」として書き換えられます。</small>
-    </div>
+    <script>
+        const digits = ['7', '0', '9', '5', '1', '1', '0'];
+        const operators = ['+', '-', '*', '/', '']; // 空白は数字の結合（例: 7と0で70）
+        let expressionMap = new Map();
 
-    <div class="form-group">
-        <label>🔁 耐久設定</label>
-        <div class="radio-group">
-            <input type="radio" name="mode" id="radioCount" value="count" checked>
-            <label for="radioCount">回数指定:</label>
-            <input type="number" id="countInput" value="10" min="1" max="500"> 回ループ
-        </div>
-        <div class="radio-group">
-            <input type="radio" name="mode" id="radioTime" value="time">
-            <label for="radioTime">時間指定:</label>
-            <input type="number" id="timeH" value="1" min="0"> 時間
-            <input type="number" id="timeM" value="0" min="0" max="59"> 分
-            <input type="number" id="timeS" value="0" min="0" max="59"> 秒
-        </div>
-    </div>
+        // ページ読み込み時に全パターン（5の6乗 = 15,625通り）を事前計算
+        window.onload = function() {
+            const dfs = (index, currentExpr) => {
+                if (index === digits.length - 1) {
+                    // JavaScriptのevalで8進数エラーが出るのを防ぐため、演算子直後の0の連続を消去 (例: +09 -> +9)
+                    let safeExpr = currentExpr.replace(/\b0+(?=\d)/g, '');
+                    
+                    try {
+                        let result = eval(safeExpr);
+                        // 計算結果が整数かつ無限大でない場合のみ保存
+                        if (Number.isFinite(result) && Number.isInteger(result)) {
+                            if (!expressionMap.has(result)) {
+                                expressionMap.set(result, currentExpr);
+                            }
+                        }
+                    } catch(e) {}
+                    return;
+                }
 
-    <button id="makeBtn">動画を生成して保存</button>
-    <div id="status">待機中...</div>
-</div>
-
-<script>
-    if (typeof SharedArrayBuffer === 'undefined') {
-        window.SharedArrayBuffer = ArrayBuffer;
-    }
-</script>
-
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
-
-<script>
-    const srcLocal = document.getElementById('srcLocal');
-    const srcYoutube = document.getElementById('srcYoutube');
-    const localInputArea = document.getElementById('localInputArea');
-    const ytInputArea = document.getElementById('ytInputArea');
-    const ytUrl = document.getElementById('ytUrl');
-
-    const radioCount = document.getElementById('radioCount');
-    const radioTime = document.getElementById('radioTime');
-    const countInput = document.getElementById('countInput');
-    const timeH = document.getElementById('timeH');
-    const timeM = document.getElementById('timeM');
-    const timeS = document.getElementById('timeS');
-    
-    const makeBtn = document.getElementById('makeBtn');
-    const statusDiv = document.getElementById('status');
-    const videoInput = document.getElementById('videoFile');
-    const thumbInput = document.getElementById('thumbFile');
-
-    // ソース入力欄の切り替え
-    function updateSourceInputs() {
-        if (srcLocal.checked) {
-            localInputArea.style.display = 'block';
-            ytInputArea.style.display = 'none';
-        } else {
-            localInputArea.style.display = 'none';
-            ytInputArea.style.display = 'block';
-        }
-    }
-    srcLocal.addEventListener('change', updateSourceInputs);
-    srcYoutube.addEventListener('change', updateSourceInputs);
-
-    // モード切替時の入力欄制御
-    function updateInputs() {
-        countInput.disabled = !radioCount.checked;
-        timeH.disabled = timeM.disabled = timeS.disabled = !radioTime.checked;
-    }
-    radioCount.addEventListener('change', updateInputs);
-    radioTime.addEventListener('change', updateInputs);
-    updateInputs();
-
-    // 動画の長さを取得
-    function getVideoDuration(file) {
-        return new Promise((resolve, reject) => {
-            const video = document.createElement('video');
-            const url = URL.createObjectURL(file);
-            video.preload = 'metadata';
-            video.onloadedmetadata = function() {
-                URL.revokeObjectURL(url);
-                resolve(video.duration);
+                for (let op of operators) {
+                    dfs(index + 1, currentExpr + op + digits[index + 1]);
+                }
             };
-            video.onerror = function() {
-                URL.revokeObjectURL(url);
-                reject(new Error("動画の長さを取得できませんでした。"));
-            };
-            video.src = url;
-        });
-    }
 
-    // 完全にシングルスレッドで動かすコアを指定
-    const { createFFmpeg, fetchFile } = FFmpeg;
-    const ffmpeg = createFFmpeg({ 
-        log: true,
-        corePath: 'https://unpkg.com/@ffmpeg/core-st@0.11.1/dist/ffmpeg-core.js'
-    });
+            // 計算開始
+            dfs(0, digits[0]);
+            document.getElementById('status').innerText = '準備完了だゾ！いいよ！こいよ！';
+        };
 
-    makeBtn.addEventListener('click', async () => {
-        // YouTubeが選択された場合の制限アラート
-        if (srcYoutube.checked) {
-            if (!ytUrl.value) {
-                alert("YouTubeのURLを入力してください。");
+        function generate() {
+            const input = document.getElementById('targetNumber').value;
+            const resultDiv = document.getElementById('result');
+
+            if (input === '') {
+                resultDiv.innerText = 'ファッ！？数字が入力されてないゾ！';
                 return;
             }
-            alert("【重要：YouTube動画を耐久化したい場合】\nブラウザの厳重なセキュリティ制限（CORS）により、HTMLからYouTubeの動画データを直接引き抜いて保存することは100%不可能となっています。\n\nお手数ですが、一度外部の動画ダウンロードサイト等で対象のYouTube動画を「MP4ファイル」としてパソコンに保存し、このツールの『ローカルファイル』として読み込ませてください。そうすれば指定時間での耐久動画の作成・サムネイル変更が完璧に行えます！");
-            return;
-        }
 
-        if (!videoInput.files.length) {
-            alert("元の動画ファイルを選択してください。");
-            return;
-        }
+            const target = parseInt(input, 10);
 
-        const videoFile = videoInput.files[0];
-        const thumbFile = thumbInput.files.length > 0 ? thumbInput.files[0] : null;
-
-        makeBtn.disabled = true;
-        
-        try {
-            statusDiv.innerText = "変換エンジンを準備中...（初回のみ数秒かかります）";
-            if (!ffmpeg.isLoaded()) {
-                await ffmpeg.load();
-            }
-
-            statusDiv.innerText = "ファイルを読み込み中...";
-            const vidExt = videoFile.name.split('.').pop();
-            const inVid = 'input.' + vidExt;
-            ffmpeg.FS('writeFile', inVid, await fetchFile(videoFile));
-            
-            let inThumb = null;
-            if (thumbFile) {
-                const thExt = thumbFile.name.split('.').pop();
-                inThumb = 'thumb.' + thExt;
-                ffmpeg.FS('writeFile', inThumb, await fetchFile(thumbFile));
-            }
-
-            let loops = 1;
-            let targetSec = 0;
-
-            if (radioCount.checked) {
-                loops = parseInt(countInput.value) || 1;
-            } else {
-                statusDiv.innerText = "動画の長さを解析中...";
-                const duration = await getVideoDuration(videoFile);
-                const h = parseInt(timeH.value) || 0;
-                const m = parseInt(timeM.value) || 0;
-                const s = parseInt(timeS.value) || 0;
-                targetSec = (h * 3600) + (m * 60) + s;
+            if (expressionMap.has(target)) {
+                let expr = expressionMap.get(target);
+                // 出力時は記号を見やすく変換
+                let displayExpr = expr
+                    .replace(/\*/g, ' × ')
+                    .replace(/\//g, ' ÷ ')
+                    .replace(/\+/g, ' ＋ ')
+                    .replace(/\-/g, ' － ');
                 
-                if (targetSec <= 0) throw new Error("時間が正しく設定されていません");
-                loops = Math.ceil(targetSec / duration); 
-            }
-
-            statusDiv.innerText = "構成リストを作成中...";
-            const listContent = Array(loops).fill(`file '${inVid}'`).join("\n");
-            ffmpeg.FS('writeFile', 'list.txt', new TextEncoder().encode(listContent));
-
-            statusDiv.innerText = "耐久動画を高速生成中...（画面を閉じずにお待ちください）";
-            
-            let args = ['-f', 'concat', '-safe', '0', '-i', 'list.txt'];
-            
-            if (inThumb) {
-                args.push('-i', inThumb, '-map', '0', '-map', '1', '-c', 'copy', '-c:v:1', 'mjpeg', '-disposition:v:1', 'attached_pic');
+                resultDiv.innerHTML = `${target} ＝<br>${displayExpr}`;
             } else {
-                args.push('-c', 'copy');
+                resultDiv.innerText = 'ンアッー！(作れなかったゾ…)';
             }
-
-            if (radioTime.checked && targetSec > 0) {
-                args.push('-t', String(targetSec));
-            }
-            
-            const outVid = 'output.mp4';
-            args.push(outVid);
-
-            // コマンドを実行
-            await ffmpeg.run(...args);
-
-            statusDiv.innerText = "ファイルの保存を準備中...";
-            const data = ffmpeg.FS('readFile', outVid);
-            
-            const blob = new Blob([data.buffer], { type: 'video/mp4' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `endurance_${Date.now()}.mp4`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            statusDiv.innerText = "完了！耐久動画が保存されました。";
-            
-            // メモリ解放
-            ffmpeg.FS('unlink', inVid);
-            if (inThumb) ffmpeg.FS('unlink', inThumb);
-            ffmpeg.FS('unlink', 'list.txt');
-            ffmpeg.FS('unlink', outVid);
-
-        } catch (e) {
-            console.error(e);
-            statusDiv.innerText = "エラーが発生しました: " + e.message;
-        } finally {
-            makeBtn.disabled = false;
         }
-    });
-</script>
-
+    </script>
 </body>
 </html>

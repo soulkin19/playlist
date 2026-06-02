@@ -3,99 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>7095110ジェネレーター（野獣先輩ver）</title>
+    <title>7095110電卓（野獣先輩ver）</title>
     <style>
         body {
-            background-color: #f5f5dc; /* 落ち着いた背景色 */
+            background-color: #f5f5dc;
             color: #333;
             font-family: 'Meiryo', sans-serif;
-            text-align: center;
-            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            margin: 0;
         }
         h1 {
-            color: #810810; /* 810カラー */
-        }
-        .container {
-            background-color: #fff;
-            border: 3px solid #114514; /* 114514カラー */
-            border-radius: 10px;
-            padding: 30px;
-            max-width: 600px;
-            margin: 0 auto;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            color: #810810;
+            margin-bottom: 5px;
         }
         p.desc {
-            font-size: 1.1em;
+            color: #555;
             margin-bottom: 20px;
         }
-        input[type="number"] {
-            padding: 12px;
-            font-size: 1.2em;
-            width: 70%;
+        .calculator {
+            background-color: #114514;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            width: 320px;
+        }
+        .display-container {
+            background-color: #c7d0cc; /* 液晶っぽい色 */
+            border: inset 3px #888;
+            border-radius: 8px;
+            padding: 10px;
             margin-bottom: 20px;
-            border: 2px solid #ccc;
-            border-radius: 5px;
+            text-align: right;
+            word-wrap: break-word;
+        }
+        #calc-input {
+            font-size: 1.2em;
+            color: #555;
+            min-height: 1.5em;
+        }
+        #calc-result {
+            font-size: 2em;
+            font-weight: bold;
+            color: #000;
+            margin: 5px 0;
+            min-height: 1.2em;
+        }
+        #yaju-formula {
+            font-size: 1em;
+            color: #810810;
+            font-weight: bold;
+            min-height: 1.5em;
+        }
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
         }
         button {
-            background-color: #114514;
-            color: white;
-            padding: 12px 30px;
-            font-size: 1.2em;
+            padding: 15px;
+            font-size: 1.5em;
             font-weight: bold;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: 0.2s;
+            background-color: #eee;
+            box-shadow: 0 4px #aaa;
+            transition: 0.1s;
         }
-        button:hover {
+        button:active {
+            box-shadow: 0 0 #aaa;
+            transform: translateY(4px);
+        }
+        button.op {
+            background-color: #dcdcdc;
+            color: #114514;
+        }
+        button.equal {
             background-color: #810810;
+            color: white;
+            box-shadow: 0 4px #4a0408;
+            grid-column: span 2;
         }
-        #result {
-            margin-top: 30px;
-            font-size: 1.6em;
-            font-weight: bold;
-            color: #d32f2f;
-            word-wrap: break-word;
-            min-height: 2em;
+        button.equal:active {
+            box-shadow: 0 0 #4a0408;
         }
-        .loading {
-            margin-top: 20px;
-            font-size: 0.9em;
-            color: gray;
+        button.clear {
+            background-color: #d32f2f;
+            color: white;
+            box-shadow: 0 4px #8a1f1f;
+            grid-column: span 2;
+        }
+        button.clear:active {
+            box-shadow: 0 0 #8a1f1f;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>7095110ジェネレーター</h1>
-        <p class="desc">
-            入力した数字を「7, 0, 9, 5, 1, 1, 0」の順番で作るゾ。<br>
-            見とけよ見とけよ〜
-        </p>
-        
-        <input type="number" id="targetNumber" placeholder="好きな数字を入れるゾ">
-        <br>
-        <button onclick="generate()">生成するゾ</button>
-        
-        <div id="result">ここに式が出るゾ</div>
-        <p class="loading" id="status">計算パターン準備中...</p>
+    <h1>7095110電卓</h1>
+    <p class="desc">計算結果を7095110で表す特別仕様だゾ</p>
+
+    <div class="calculator">
+        <div class="display-container">
+            <div id="calc-input"></div>
+            <div id="calc-result">0</div>
+            <div id="yaju-formula">準備中...</div>
+        </div>
+        <div class="keypad">
+            <button class="clear" onclick="clearDisplay()">C</button>
+            <button class="op" onclick="appendChar('/')">÷</button>
+            <button class="op" onclick="appendChar('*')">×</button>
+            
+            <button onclick="appendChar('7')">7</button>
+            <button onclick="appendChar('8')">8</button>
+            <button onclick="appendChar('9')">9</button>
+            <button class="op" onclick="appendChar('-')">−</button>
+            
+            <button onclick="appendChar('4')">4</button>
+            <button onclick="appendChar('5')">5</button>
+            <button onclick="appendChar('6')">6</button>
+            <button class="op" onclick="appendChar('+')">＋</button>
+            
+            <button onclick="appendChar('1')">1</button>
+            <button onclick="appendChar('2')">2</button>
+            <button onclick="appendChar('3')">3</button>
+            <button class="equal" style="grid-row: span 2; height: 100%;" onclick="calculate()">＝</button>
+            
+            <button onclick="appendChar('0')" style="grid-column: span 2;">0</button>
+            <button onclick="appendChar('.')">.</button>
+        </div>
     </div>
 
     <script>
         const digits = ['7', '0', '9', '5', '1', '1', '0'];
-        const operators = ['+', '-', '*', '/', '']; // 空白は数字の結合（例: 7と0で70）
+        const operators = ['+', '-', '*', '/', '']; 
         let expressionMap = new Map();
+        let currentExpression = "";
 
-        // ページ読み込み時に全パターン（5の6乗 = 15,625通り）を事前計算
+        // ページ読み込み時に7095110の全パターンを計算（バックグラウンド処理）
         window.onload = function() {
             const dfs = (index, currentExpr) => {
                 if (index === digits.length - 1) {
-                    // JavaScriptのevalで8進数エラーが出るのを防ぐため、演算子直後の0の連続を消去 (例: +09 -> +9)
                     let safeExpr = currentExpr.replace(/\b0+(?=\d)/g, '');
-                    
                     try {
                         let result = eval(safeExpr);
-                        // 計算結果が整数かつ無限大でない場合のみ保存
                         if (Number.isFinite(result) && Number.isInteger(result)) {
                             if (!expressionMap.has(result)) {
                                 expressionMap.set(result, currentExpr);
@@ -104,40 +157,60 @@
                     } catch(e) {}
                     return;
                 }
-
                 for (let op of operators) {
                     dfs(index + 1, currentExpr + op + digits[index + 1]);
                 }
             };
-
-            // 計算開始
             dfs(0, digits[0]);
-            document.getElementById('status').innerText = '準備完了だゾ！いいよ！こいよ！';
+            document.getElementById('yaju-formula').innerText = "完了したゾ！";
         };
 
-        function generate() {
-            const input = document.getElementById('targetNumber').value;
-            const resultDiv = document.getElementById('result');
+        function updateDisplay() {
+            const display = document.getElementById('calc-input');
+            display.innerText = currentExpression.replace(/\*/g, ' × ').replace(/\//g, ' ÷ ').replace(/\+/g, ' ＋ ').replace(/\-/g, ' − ');
+        }
 
-            if (input === '') {
-                resultDiv.innerText = 'ファッ！？数字が入力されてないゾ！';
-                return;
-            }
+        function appendChar(char) {
+            currentExpression += char;
+            updateDisplay();
+        }
 
-            const target = parseInt(input, 10);
+        function clearDisplay() {
+            currentExpression = "";
+            document.getElementById('calc-input').innerText = "";
+            document.getElementById('calc-result').innerText = "0";
+            document.getElementById('yaju-formula').innerText = "";
+        }
 
-            if (expressionMap.has(target)) {
-                let expr = expressionMap.get(target);
-                // 出力時は記号を見やすく変換
-                let displayExpr = expr
-                    .replace(/\*/g, ' × ')
-                    .replace(/\//g, ' ÷ ')
-                    .replace(/\+/g, ' ＋ ')
-                    .replace(/\-/g, ' － ');
+        function calculate() {
+            try {
+                // 安全な計算処理
+                let result = eval(currentExpression);
                 
-                resultDiv.innerHTML = `${target} ＝<br>${displayExpr}`;
-            } else {
-                resultDiv.innerText = 'ンアッー！(作れなかったゾ…)';
+                // 小数点第4位で丸める
+                result = Math.round(result * 10000) / 10000;
+                
+                document.getElementById('calc-result').innerText = result;
+
+                // 7095110への変換ロジック
+                const yajuDisplay = document.getElementById('yaju-formula');
+                
+                if (!Number.isInteger(result)) {
+                    yajuDisplay.innerText = "（小数は作れないゾ…）";
+                } else if (expressionMap.has(result)) {
+                    let expr = expressionMap.get(result);
+                    let displayExpr = expr
+                        .replace(/\*/g, ' × ')
+                        .replace(/\//g, ' ÷ ')
+                        .replace(/\+/g, ' ＋ ')
+                        .replace(/\-/g, ' − ');
+                    yajuDisplay.innerText = `＝ ${displayExpr}`;
+                } else {
+                    yajuDisplay.innerText = "ンアッー！(作れないゾ)";
+                }
+            } catch (e) {
+                document.getElementById('calc-result').innerText = "Error";
+                document.getElementById('yaju-formula').innerText = "式がオカシイだろ！";
             }
         }
     </script>
